@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>원단 사이즈 검사 · 셋팅 조회</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#16181c;--sub:#5d636d;--line:#e3e6eb;--bg:#f4f5f7;--blue:#2a64b8;--blue-d:#1f4f9a;--ok:#1f9d55;--ng:#d64545;--warn:#b7791f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans KR",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:520px;margin:0 auto;padding:0 0 40px}
+header{background:var(--ink);color:#fff;padding:18px 18px 16px}
+header .t{font-size:19px;font-weight:700}
+header .s{font-size:12.5px;color:#aeb4bd;margin-top:3px}
+.badge{display:inline-block;background:#f1c40f;color:#222;font-size:11px;font-weight:700;border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:2px}
+.sec{padding:14px 16px 0}
+.search{position:relative}
+.search input{width:100%;font:inherit;font-size:17px;padding:14px 44px 14px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;outline:none}
+.search input:focus{border-color:var(--blue)}
+.search .clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:#eef0f3;border-radius:50%;width:28px;height:28px;font-size:15px;color:#555;display:none}
+.list{margin-top:10px;background:#fff;border-radius:12px;border:1px solid var(--line);overflow:hidden}
+.item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid var(--line);cursor:pointer}
+.item:first-child{border-top:0}
+.item:active{background:#f0f4fb}
+.item .code{font-weight:700;font-size:15px;min-width:86px}
+.item .nm{flex:1;font-size:13.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .sz{font-variant-numeric:tabular-nums;font-size:14px;font-weight:500}
+.empty{padding:18px;text-align:center;color:var(--sub);font-size:14px}
+.card{background:#fff;border-radius:14px;border:1px solid var(--line);margin-top:12px;overflow:hidden}
+.card .hd{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 16px 4px}
+.card .hd .code{font-size:22px;font-weight:900}
+.card .hd .nm{font-size:13px;color:var(--sub);margin-top:2px}
+.back{border:0;background:#eef0f3;border-radius:8px;padding:7px 10px;font:inherit;font-size:13px;color:#333}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 16px 6px}
+.big .b{border-radius:12px;padding:12px 12px 10px;color:#fff}
+.big .b.x{background:var(--blue)}
+.big .b.y{background:var(--blue-d)}
+.big .lbl{font-size:12.5px;opacity:.85}
+.big .v{font-size:40px;font-weight:900;line-height:1.1;font-variant-numeric:tabular-nums}
+.big .v small{font-size:16px;font-weight:500;margin-left:2px}
+.big .tol{font-size:13px;opacity:.9}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;margin-top:6px;background:rgba(255,255,255,.18);border-radius:20px;padding:2px 9px 2px 4px}
+.chip i{width:14px;height:14px;border-radius:50%;display:inline-block;border:2px solid #fff}
+.warn{margin:6px 16px 0;background:#fff6e5;border:1px solid #f3d398;color:#7a5413;border-radius:10px;padding:10px 12px;font-size:13.5px}
+.diagram{padding:6px 12px 0}
+.steps{padding:8px 16px 4px;margin:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;position:relative;padding:8px 0 8px 34px;font-size:14.5px;border-top:1px dashed var(--line)}
+.steps li:first-child{border-top:0}
+.steps li:before{content:counter(s);position:absolute;left:0;top:7px;width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.steps b{color:var(--blue-d)}
+.judge{padding:6px 16px 16px}
+.judge .who{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.judge .who label{font-size:13px;color:var(--sub);white-space:nowrap}
+.judge .who input{flex:1;font:inherit;font-size:15px;padding:9px 10px;border:1px solid var(--line);border-radius:8px}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btns button{border:0;border-radius:12px;padding:16px 0;font:inherit;font-size:20px;font-weight:900;color:#fff}
+.btns .ok{background:var(--ok)}.btns .ng{background:var(--ng)}
+.btns button:active{filter:brightness(.92)}
+.ngwhy{display:none;margin-top:10px;gap:6px;flex-wrap:wrap}
+.ngwhy button{border:1px solid #f0b4b4;background:#fff5f5;color:#9b2c2c;border-radius:20px;padding:7px 12px;font:inherit;font-size:13.5px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;transition:transform .25s;z-index:9}
+.toast.on{transform:translateX(-50%) translateY(0)}
+.log h3{font-size:15px;margin:18px 0 8px;display:flex;justify-content:space-between;align-items:center}
+.log h3 span{font-size:12px;color:var(--sub);font-weight:400}
+.log table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;font-size:13px}
+.log th,.log td{padding:8px 8px;border-top:1px solid var(--line);text-align:left}
+.log th{background:#f7f8fa;font-weight:500;color:var(--sub);border-top:0}
+.log .r-ok{color:var(--ok);font-weight:700}.log .r-ng{color:var(--ng);font-weight:700}
+.foot{font-size:12px;color:var(--sub);padding:16px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="t">원단 사이즈 검사 · 셋팅 조회</div>
+    <div class="s">지그 QR → 원단코드 선택 → 칸막이 셋팅 → OK / NG 기록</div>
+  </header>
+
+  <div id="viewList">
+    <div class="sec">
+      <div class="search">
+        <input id="q" type="search" inputmode="search" placeholder="원단코드 입력 (예: A0147)" autocomplete="off">
+        <button class="clr" id="clr" aria-label="지우기">✕</button>
+      </div>
+      <div class="list" id="list"></div>
+    </div>
+    <div class="sec log" id="logSec"></div>
+  </div>
+
+  <div id="viewDetail" style="display:none">
+    <div class="sec"><div class="card" id="card"></div></div>
+  </div>
+
+  <div class="foot">※ 원단 치수는 CAD 도면(16종) 기준입니다. 가로 = 긴 변, 세로 = 짧은 변으로 지그에 놓습니다. 세로 98mm 미만 원단은 칸막이 없이 눈금으로 직접 확인합니다. 공차는 도면에 표기된 A7301(±1) 외에는 기본값 ±1입니다. OK/NG 기록은 현재 이 폰에만 저장됩니다.</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 셋팅표 (샘플) — 실제는 구글시트에서 불러옴 =====
+const FABRICS = [{"code": "A0147", "name": "", "dw": 132, "dh": 125, "w": 132, "h": 125, "tol": 1, "tolDef": true, "note": ""}, {"code": "A0335", "name": "A0335 개정", "dw": 136, "dh": 160, "w": 160, "h": 136, "tol": 1, "tolDef": true, "note": ""}, {"code": "A1516", "name": "T2 전용", "dw": 147, "dh": 140, "w": 147, "h": 140, "tol": 1, "tolDef": true, "note": ""}, {"code": "A1550", "name": "", "dw": 98, "dh": 152, "w": 152, "h": 98, "tol": 1, "tolDef": true, "note": ""}, {"code": "A4684", "name": "", "dw": 163, "dh": 130, "w": 163, "h": 130, "tol": 1, "tolDef": true, "note": ""}, {"code": "A5904", "name": "", "dw": 142, "dh": 139, "w": 142, "h": 139, "tol": 1, "tolDef": true, "note": "도면에 치수 미기재 – CAD 선 길이로 산출, 확인 필요"}, {"code": "A6239", "name": "", "dw": 129, "dh": 166.2, "w": 166.2, "h": 129, "tol": 1, "tolDef": true, "note": ""}, {"code": "A6900", "name": "", "dw": 130, "dh": 136, "w": 136, "h": 130, "tol": 1, "tolDef": true, "note": ""}, {"code": "A7301", "name": "OUTER", "dw": 150, "dh": 127, "w": 150, "h": 127, "tol": 1, "tolDef": false, "note": ""}, {"code": "A7896", "name": "메쉬 정면", "dw": 145, "dh": 154.6, "w": 154.6, "h": 145, "tol": 1, "tolDef": true, "note": ""}, {"code": "A7", "name": "", "dw": 227, "dh": 126, "w": 227, "h": 126, "tol": 1, "tolDef": true, "note": ""}, {"code": "A8000", "name": "", "dw": 129, "dh": 131, "w": 131, "h": 129, "tol": 1, "tolDef": true, "note": ""}, {"code": "A9144", "name": "", "dw": 153, "dh": 131, "w": 153, "h": 131, "tol": 1, "tolDef": true, "note": ""}, {"code": "A9499", "name": "", "dw": 180, "dh": 105, "w": 180, "h": 105, "tol": 1, "tolDef": true, "note": ""}, {"code": "AFC1 S16", "name": "", "dw": 70, "dh": 134, "w": 134, "h": 70, "tol": 1, "tolDef": true, "note": ""}, {"code": "C02174", "name": "MU620", "dw": 124, "dh": 65, "w": 124, "h": 65, "tol": 1, "tolDef": true, "note": ""}];
+// 세로 눈금 색 표시 (10mm 단위) — 지그 스티커와 동일
+const YMARK = {100:['초록','#2e9e4f'],110:['파랑','#1f5fbf'],120:['빨강','#c0392b'],130:['보라','#7d3cc0'],140:['주황','#e07a00']};
+const LIM = {wMax:280, hMin:98, hMax:150};
+
+const $ = s => document.querySelector(s);
+let cur = null, lastNgCode = null;
+
+function store(k, v){ try{ if(v===undefined) return JSON.parse(localStorage.getItem(k)||'null'); localStorage.setItem(k, JSON.stringify(v)); }catch(e){ return null; } }
+let LOG = store('jigLog') || [];
+
+function renderList(){
+  const q = $('#q').value.trim().toLowerCase();
+  $('#clr').style.display = q ? 'block' : 'none';
+  const rows = FABRICS.filter(f => !q || f.code.toLowerCase().replace(/\s/g,'').includes(q.replace(/\s/g,'')) || f.name.toLowerCase().includes(q));
+  $('#list').innerHTML = rows.length ? rows.map(f =>
+    `<div class="item" data-c="${f.code}"><span class="code">${f.code}</span><span class="nm">${f.name}${f.h<LIM.hMin?' <b style="color:#b7791f">눈금 확인</b>':''}</span><span class="sz">${f.w} × ${f.h}${(f.h>LIM.hMax||f.w>LIM.wMax)?' ⚠':''}</span></div>`).join('')
+    : '<div class="empty">찾는 원단이 없습니다. 셋팅표(구글시트)에 등록됐는지 확인하세요.</div>';
+  renderLog();
+}
+
+function nearestMark(h){
+  const k = Object.keys(YMARK).map(Number).reduce((a,b)=>Math.abs(b-h)<Math.abs(a-h)?b:a);
+  return {k, name:YMARK[k][0], col:YMARK[k][1], diff:h-k};
+}
+
+function diagram(f, small){
+  // 지그 평면 (판 340×210, 기준벽 16), 1mm = 0.9px 정도
+  const S=0.95, W=340*S, H=210*S, ox=10, oy=10, wall=16*S;
+  const X = x => ox + wall + x*S;           // 눈금 0 = 기준벽 안쪽
+  const Y = y => oy + H - wall - y*S;
+  const fw=Math.min(f.w,300), fh=Math.min(f.h,180);
+  const barH = small ? 185 : fh; const blkX = X(fw);
+  const ticks=[]; for(let i=0;i<=300;i+=10){const L=i%50?4:8; ticks.push(`<line x1="${X(i)}" y1="${oy+H-wall}" x2="${X(i)}" y2="${oy+H-wall+L}" stroke="#bbb" stroke-width="1"/>`); if(i%50===0) ticks.push(`<text x="${X(i)}" y="${oy+H-2}" font-size="8" fill="#ddd" text-anchor="middle">${i}</text>`);}
+  for(let i=0;i<=180;i+=10){const L=i%50?4:8; ticks.push(`<line x1="${ox+wall}" y1="${Y(i)}" x2="${ox+wall-L}" y2="${Y(i)}" stroke="#bbb" stroke-width="1"/>`);}
+  const band = `<rect x="${ox}" y="${Y(140)}" width="${wall}" height="${40*S}" fill="#f1c40f" opacity=".85"/>`;
+  const marks = Object.entries(YMARK).map(([k,[n,c]])=>`<rect x="${ox+2}" y="${Y(+k)-2}" width="7" height="4" fill="${c}"/>`).join('');
+  return `<svg viewBox="0 0 ${W+20} ${H+20}" width="100%" role="img" aria-label="지그 셋팅 위치">
+    <rect x="${ox}" y="${oy}" width="${W}" height="${H}" rx="4" fill="#2b2c2f"/>
+    <rect x="${ox}" y="${oy+H-wall}" width="${W}" height="${wall}" fill="#3a3c40"/>
+    <rect x="${ox}" y="${oy}" width="${wall}" height="${H-wall}" fill="#3a3c40"/>
+    ${band}${marks}${ticks.join('')}
+    <rect x="${X(0)}" y="${Y(fh)}" width="${fw*S}" height="${fh*S}" fill="#fafafa"/>
+    <text x="${X(fw/2)}" y="${Y(fh/2)+5}" font-size="13" font-weight="700" fill="#888" text-anchor="middle">원단 ${f.w}×${f.h}</text>
+    <rect x="${X(0)+1}" y="${Y(barH)-15*S}" width="${(318)*S}" height="${15*S}" fill="#2a64b8"/>
+    ${small ? '' : `<rect x="${blkX}" y="${Y(fh)}" width="${12*S}" height="${Math.min(95,fh-5)*S}" fill="#4d86d6" stroke="#1f4f9a" stroke-width="1"/>
+    <rect x="${blkX-14*S}" y="${Y(fh)-15*S-2}" width="${40*S}" height="${(15+15)*S}" fill="#4d86d6" opacity=".55"/>`}
+    <line x1="${X(fw)}" y1="${oy+H-wall}" x2="${X(fw)}" y2="${Y(fh)}" stroke="#ffd34d" stroke-width="1.2" stroke-dasharray="3,2"/>
+    <line x1="${ox+wall}" y1="${Y(fh)}" x2="${X(fw)}" y2="${Y(fh)}" stroke="#ffd34d" stroke-width="1.2" stroke-dasharray="3,2"/>
+    <text x="${X(fw)+4}" y="${oy+H-wall-4}" font-size="11" font-weight="700" fill="#ffd34d">${f.w}</text>
+    <text x="${ox+wall+3}" y="${Y(fh)-(small?4:17*S)}" font-size="11" font-weight="700" fill="#ffd34d">${f.h}</text>
+  </svg>`;
+}
+
+function openDetail(code){
+  cur = FABRICS.find(f=>f.code===code); if(!cur) return;
+  const m = nearestMark(cur.h);
+  const out = [];
+  if(cur.w > LIM.wMax) out.push(`가로 ${cur.w}mm — 지그 최대 ${LIM.wMax}mm 초과`);
+  if(cur.h > LIM.hMax) out.push(`세로 ${cur.h}mm — 지그 최대 ${LIM.hMax}mm 초과`);
+  const small = cur.h < LIM.hMin;
+  const markTxt = m.diff===0 ? `${m.name} 표시에 맞춤` : `${m.name} 표시(${m.k}) ${m.diff>0?'+':''}${m.diff}mm`;
+  $('#card').innerHTML = `
+    <div class="hd"><div><div class="code">${cur.code}</div><div class="nm">${cur.name ? cur.name+' · ' : ''}도면 ${cur.dw} × ${cur.dh}</div></div><button class="back" id="back">← 목록</button></div>
+    ${out.length ? `<div class="warn">⚠ 이 지그로 검사할 수 없는 원단입니다.<br>${out.join('<br>')}</div>` : (cur.dw<cur.dh ? `<div class="warn" style="background:#eef4ff;border-color:#bcd0f0;color:#1f4f9a">↻ 도면과 90° 돌려서 놓으세요 — 긴 변(${cur.w})을 앞쪽 가로로</div>` : '')}${cur.note ? `<div class="warn">※ ${cur.note}</div>` : ''}${small ? `<div class="warn">📏 작은 원단 — 칸막이 쓰지 말고 <b>눈금으로 직접 확인</b>하세요<br>(세로 ${cur.h}mm라 블록이 앞 기준벽에 걸림)</div>` : ''}
+    <div class="big">
+      <div class="b y"><div class="lbl">${small?'세로 (왼쪽 눈금)':'① 세로 (파란 바)'}</div><div class="v">${cur.h}<small>mm</small></div><div class="tol">공차 ±${cur.tol}${cur.tolDef?' (기본값)':''}</div>
+        ${small?'':`<div class="chip"><i style="background:${m.col}"></i>${markTxt}</div>`}</div>
+      <div class="b x"><div class="lbl">${small?'가로 (앞쪽 눈금)':'② 가로 (블록)'}</div><div class="v">${cur.w}<small>mm</small></div><div class="tol">공차 ±${cur.tol}${cur.tolDef?' (기본값)':''}</div>
+        <div class="chip" style="padding-left:9px">앞쪽 눈금자 기준</div></div>
+    </div>
+    ${out.length ? '<div class="warn" style="margin-bottom:16px">셋팅하지 말고 줄자·스틸자로 따로 측정한 뒤 생산기술팀에 알려주세요.</div>' : `<div class="diagram">${diagram(cur, small)}</div>`}
+    ${out.length ? '' : `${small ? `<ol class="steps">
+      <li>파란 바를 <b>뒤쪽 끝까지</b> 밀어두기 (칸막이 사용 안 함)</li>
+      <li>원단을 왼쪽·앞쪽 기준벽 모서리에 밀착</li>
+      <li>앞쪽 눈금에서 가로 <b>${cur.w}</b>, 왼쪽 눈금에서 세로 <b>${cur.h}</b> 확인</li>
+      <li><b>±${cur.tol} 안이면 OK</b>, 벗어나면 NG</li>
+    </ol>` : `<ol class="steps">
+      <li>파란 바를 왼쪽 세로 눈금 <b>${cur.h}</b>에 맞추고 오른쪽 노브 고정</li>
+      <li>블록을 앞쪽 가로 눈금 <b>${cur.w}</b>에 맞추고 위쪽 노브 고정</li>
+      <li>원단을 왼쪽·앞쪽 기준벽 모서리에 밀착</li>
+      <li>바·블록에 <b>딱 맞으면 OK</b>, 남거나 걸리면 NG (공차 ±${cur.tol})</li>
+    </ol>`}
+    <div class="judge">
+      <div class="who"><label for="who">작업자</label><input id="who" placeholder="이름" value="${store('jigWho')||''}"></div>
+      <div class="btns"><button class="ok" id="bOk">OK</button><button class="ng" id="bNg">NG</button></div>
+      <div class="ngwhy" id="ngwhy">
+        <button data-r="가로 큼">가로 큼</button><button data-r="가로 작음">가로 작음</button>
+        <button data-r="세로 큼">세로 큼</button><button data-r="세로 작음">세로 작음</button>
+        <button data-r="사선·변형">사선·변형</button><button data-r="기타">기타</button>
+      </div>
+    </div>`}`;
+  $('#viewList').style.display='none'; $('#viewDetail').style.display='block'; window.scrollTo(0,0);
+  $('#back').onclick = showList;
+  if(out.length) return;
+  $('#who').oninput = e => store('jigWho', e.target.value.trim());
+  $('#bOk').onclick = () => record('OK','');
+  $('#bNg').onclick = () => { $('#ngwhy').style.display='flex'; };
+  $('#ngwhy').onclick = e => { const r=e.target.dataset.r; if(r) record('NG', r); };
+}
+
+function record(res, why){
+  const who = ($('#who').value||'').trim() || '미입력';
+  const d = new Date(), p=n=>String(n).padStart(2,'0');
+  LOG.unshift({t:`${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`, code:cur.code, res, why, who});
+  LOG = LOG.slice(0,50); store('jigLog', LOG);
+  toast(res==='OK' ? `✔ ${cur.code} OK 기록` : `✖ ${cur.code} NG (${why}) 기록`);
+  setTimeout(showList, 700);
+}
+
+function renderLog(){
+  if(!LOG.length){ $('#logSec').innerHTML=''; return; }
+  const today = LOG.length, ng = LOG.filter(l=>l.res==='NG').length;
+  $('#logSec').innerHTML = `<h3>최근 판정 기록 <span>${today}건 · NG ${ng}건</span></h3>
+    <table><tr><th>시간</th><th>원단</th><th>결과</th><th>작업자</th></tr>
+    ${LOG.slice(0,10).map(l=>`<tr><td>${l.t}</td><td>${l.code}</td><td class="${l.res==='OK'?'r-ok':'r-ng'}">${l.res}${l.why?' · '+l.why:''}</td><td>${l.who}</td></tr>`).join('')}</table>`;
+}
+
+function showList(){ $('#viewDetail').style.display='none'; $('#viewList').style.display='block'; renderList(); }
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),1500); }
+
+$('#q').oninput = renderList;
+$('#clr').onclick = () => { $('#q').value=''; renderList(); $('#q').focus(); };
+$('#list').onclick = e => { const it=e.target.closest('.item'); if(it) openDetail(it.dataset.c); };
+renderList();
+</script>
+</body>
+</html>
